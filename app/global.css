@@ -1,0 +1,66 @@
+:root {
+    --font-size-base: 16px;
+    --ant-primary-color: #1890ff;
+    --ant-font-family: 'Arial', sans-serif;
+    --ant-font-size-base: 20px;
+    --ant-border-radius-base: 10px;
+    --ant-height-base: 50px;
+    --ant-font-size-large: 1.2em;
+  }
+  
+  body {
+    font-family: var(--ant-font-family);
+    font-size: var(--font-size-base);
+  }
+  
+  .ant-btn {
+    font-size: var(--ant-font-size-base);
+    height: var(--ant-height-base);
+    border-radius: var(--ant-border-radius-base);
+  }
+  
+  .ant-input,
+  .ant-select-selector {
+    font-size: var(--ant-font-size-base) !important;
+    height: var(--ant-height-base) !important;
+    border-radius: var(--ant-border-radius-base) !important;
+  }
+  
+  .ant-form-item-label > label {
+    font-size: var(--ant-font-size-large) !important;
+  }
+  
+  .ant-select-selection-item {
+    font-size: var(--ant-font-size-base !important);
+    height: var(--ant-height-base) !important;
+  }
+  
+  .ant-radio-wrapper {
+    font-size: var(--ant-font-size-base) !important;
+  }
+  
+  .ant-radio-button-wrapper {
+    height: var(--ant-height-base);
+    line-height: var(--ant-height-base);
+    font-size: var(--ant-font-size-base);
+    border-radius: var(--ant-border-radius-base);
+  }
+
+  .anticon-close-circle svg,
+  .ant-select-arrow svg {
+    width: 2em;
+    height: 2em;
+  }
+
+  .box {
+    text-align: center;
+    width: 420px;
+    margin-bottom: auto;
+    padding: 20px;
+    background: #f0f0f0;
+    margin-top: 30px;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  
