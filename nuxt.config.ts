@@ -12,7 +12,6 @@ export default defineNuxtConfig({
       // You can specify here any folder from which you want to auto-import
     ],
   },
-
   dir: {
     pages: "routes",
   },

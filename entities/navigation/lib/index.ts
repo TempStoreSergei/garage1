@@ -3,7 +3,7 @@ export const navigationConfigs = [
       showPrevious: false,
       showNext: true,
       previousDisabled: true,
-      nextDisabled: false,
+      nextDisabled: true,
       nextRoute: '/add-car-info',
       previousRoute: '',
     },
@@ -11,7 +11,7 @@ export const navigationConfigs = [
       showPrevious: true,
       showNext: true,
       previousDisabled: false,
-      nextDisabled: false,
+      nextDisabled: true,
       nextRoute: '/add-service',
       previousRoute: '/',
       

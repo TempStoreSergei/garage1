@@ -6,7 +6,7 @@ export const useNavigationStore = defineStore('navigation', {
     showPrevious: false,
     showNext: true,
     previousDisabled: true,
-    nextDisabled: false,
+    nextDisabled: true,
     showCloseModal: false,
     nextRoute: 'add-car-info',
     previousRoute: '/',
@@ -24,6 +24,12 @@ export const useNavigationStore = defineStore('navigation', {
     },
     handleNext(router) {
       router.push(this.nextRoute);
+    },
+    handleNextAvalible() {
+      this.nextDisabled = false;
+    },
+    handleNextDisable() {
+      this.nextDisabled = true;
     },
     getNavigationConfig(step: number) {
       return navigationConfigs[step];

@@ -1,74 +1,151 @@
 <template>
   <div class="box">
-    <a-form
-      :model="formState"
-      @submit.prevent="handleSubmit"
-      layout="vertical"
-      class="add-car-info-form"
-    >
+    <a-form :model="formState" layout="vertical" ref="formRef">
       <a-form-item
-        label="Номер машины"
-        name="carNumber"
-        :rules="[ { required: true, message: 'Please input car number!' } ]"
-      >
-        <a-input v-model:value="formState.carNumber" disabled size="large" />
-      </a-form-item>
-
-      <a-form-item
-        label="Название машины"
+        v-if="disableCarName"
+        label="Название бренда"
         name="carName"
-        :rules="[ { required: true, message: 'Please input car name!' } ]"
+        :rules="CarBranRules"
       >
-        <a-input v-model:value="formState.carName" placeholder="Название машины" size="large" />
+        <a-input
+          v-model:value="formState.carName"
+          @input="handlerChangeName"
+          placeholder="Название бренда"
+          size="large"
+        />
       </a-form-item>
-
       <a-form-item
         label="Выберите перевозчика"
         name="carrier"
-        :rules="[ { required: true, message: 'Please select a carrier!' } ]"
+        :rules="[{ required: true, message: 'Please select a carrier!' }]"
       >
-        <a-select v-model:value="formState.carrier" placeholder="Выберите перевозчика" size="large">
-          <a-select-option value="carrier1">Carrier 1</a-select-option>
-          <a-select-option value="carrier2">Carrier 2</a-select-option>
-          <a-select-option value="carrier3">Carrier 3</a-select-option>
-        </a-select>
+        <a-select
+          v-model:value="formState.carrier"
+          show-search
+          placeholder="Выберите перевозчика"
+          size="large"
+          :field-names="{ label: 'nameperevoz', value: 'id' }"
+          :options="carrierOptions"
+          :filter-option="filterOption"
+          @change="handlerChangeCarrier({id: $event, label: carrierOptions[$event - 1].nameperevoz })"
+        />
       </a-form-item>
     </a-form>
   </div>
 </template>
 
 <script setup>
-import { reactive } from 'vue';
-import { useRouter, useRoute } from 'vue-router';
+import { reactive, ref, onMounted, watch } from "vue";
+import { useCheckStore } from "../../../entities/check/models";
+import { API } from "~/shared/api";
 import { message } from 'ant-design-vue';
+import { useNavigationStore } from "../../../entities/navigation/models";
+const navigatiionStore = useNavigationStore();
 
-const router = useRouter();
-const route = useRoute();
-const nextRoute = ref();
-const previousRoute = ref();
+const checkStore = useCheckStore();
+const formRef = ref(null);
 
 const formState = reactive({
-  carNumber: route.query.carNumber || '',
-  carName: '',
-  carrier: ''
+  carName: checkStore.carBrand.label,
+  carrier: checkStore.carrier.label,
 });
 
+const disableCarName = ref(false);
+
+const handlerChangeName = (inputEvent) => {
+  checkStore.setCarBrand(inputEvent.target.value);
+};
+
+const handlerChangeCarrier = (data) => {
+  checkStore.setCarrier(data);
+};
+
 const handleSubmit = () => {
-  if (formState.carName && formState.carrier) {
-    message.success('Car information added successfully!');
-    router.push('/select-service');
-  } else {
-    message.error('Please fill in all required fields!');
+  // Handle form submission
+};
+
+
+const handleNextAvailable = () => {
+  navigatiionStore.handleNextAvalible();
+};
+
+const handleNextDisable = () => {
+  navigatiionStore.handleNextDisable();
+};
+
+const CarBranRules = [
+  {
+    required: true,
+    message: "Пожалуйста, введите марку автомобиля!",
+  },
+  {
+    max: 15,
+    message: "Назваине бренда должно состоять из менее 15 символов",
+    trigger: 'blur'
+  },
+];
+
+const carrierOptions = ref([]);
+
+const filterOption = (input, option) => {
+  return option.nameperevoz.toLowerCase().includes(input.toLowerCase());
+};
+
+const fetchCarCarrier = async () => {
+  try {
+    const { data } = await API.get("get_all_perevoz");
+    carrierOptions.value = data;
+  } catch (error) {
+    console.error("Error fetching carrier options:", error);
   }
 };
 
-// Update the next and previous routes in the layout
-nextRoute.value = '/select-service';
-previousRoute.value = '/register-car';
-</script>
+const fetchCarDetails = async (carNumber) => {
+  try {
+    const { data } = await API.post("get_user_auto", { numberauto: carNumber });
+    if (data.fail !== "yes") {
+      disableCarName.value = false;
+      message.success("Номер автомобиля найден в базе! Информация подставиться автоматический");
+      const infoCarrier = {
+        label: data.nameperevoz,
+        id: data.id
+      }
+      console.log(infoCarrier)
+      formState.carrier = data.nameperevoz;
+      checkStore.setCarBrand(data.nameauto);
+      handlerChangeCarrier(infoCarrier);
+    } else {
+      disableCarName.value = true;
+      formState.carName = "";
+      formState.carrier = "";
+      checkStore.setCarBrand("");
+      handlerChangeCarrier({});
+    }
+  } catch (error) {
+    console.error("Error fetching car details:", error);
+  }
+};
 
-<style>
-.add-car-info-form {
-  width: 100%;
-}
-</style>
+onMounted(() => {
+  fetchCarCarrier();
+  fetchCarDetails(checkStore.carNumber);
+});
+
+// Watchers to validate form fields
+watch(
+  () => [formState.carName, formState.carrier],
+  async () => {
+    try {
+      const valid = await formRef.value.validate();
+      if(valid) {
+        handleNextAvailable();
+      } else {
+        handleNextDisable();
+      }
+
+    } catch (error) {
+      console.error("Validation failed:", error);
+    }
+  },
+);
+</script>

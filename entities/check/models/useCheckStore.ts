@@ -1,24 +1,50 @@
+
 import { defineStore } from 'pinia';
 
 export const useCheckStore = defineStore('check', {
   state: () => ({
     carNumber: '',
     carBrand: '',
-    carrier: '',
-    services: [],
-    withFoam: false,
+    carNumberType: '',
+    carrier: {
+      label: "",
+      id: null
+    },
+    washServise: {
+      label: "",
+      id: null
+    },
+    disenfactionServise: {
+      label: "",
+      id: null
+    },
+    withFoam: true,
   }),
   actions: {
-    updateCarDetails({ carNumber, carBrand, carrier }) {
+    setCarNumber(carNumber) {
       this.carNumber = carNumber;
+    },
+    setCarNumberType(carNumberType) {
+      this.carNumberType = carNumberType;
+    },
+    setCarBrand(carBrand) {
       this.carBrand = carBrand;
-      this.carrier = carrier;
+    },
+    setCarrier(carrier) {
+      console.log(carrier)
+      this.carrier.id = carrier.id;
+      this.carrier.label = carrier.label;
     },
     toggleFoam() {
       this.withFoam = !this.withFoam;
     },
-    addService(category, items) {
-      this.services.push({ category, items });
+    addServiceWash(wash) {
+      this.washServise.id = wash.id;
+      this.washServise.label = wash.label;
+    },
+    addServiceDisenfaction(disenfaction) {
+      this.disenfactionServise.id = disenfaction.id;
+      this.disenfactionServise.label = disenfaction.label;
     },
     clearServices() {
       this.services = [];

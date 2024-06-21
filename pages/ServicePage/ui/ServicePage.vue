@@ -7,10 +7,16 @@
         <a-tab-pane key="1" tab="Дезинфекция">
           <div class="tab-content" ref="tabContent1">
             <div class="service-cards">
-              <div v-for="service in category1" :key="service.value"
-                :class="['service-card', { 'selected': selectedServices.includes(service.value) }]"
-                @click="selectService(service.value)">
-                <div class="card-title">{{ service.name }}</div>
+              <div
+                v-for="service in disinfection"
+                :key="service.id"
+                :class="[
+                  'service-card',
+                  {selected: checkStore.disenfactionServise.id === service.id },
+                ]"
+                @click="selectServiceDisenfection(service)"
+              >
+                <div class="card-title">{{ service.namedesinfect }}</div>
               </div>
             </div>
           </div>
@@ -18,75 +24,89 @@
         <a-tab-pane key="2" tab="Мойка">
           <div class="tab-content" ref="tabContent2">
             <div class="service-cards">
-              <div v-for="service in category2" :key="service.value"
-                :class="['service-card', { 'selected': selectedServices.includes(service.value) }]"
-                @click="selectService(service.value)">
-                <div class="card-title">{{ service.name }}</div>
+              <div
+                v-for="service in carWash"
+                :key="service.id"
+                :class="[
+                  'service-card',
+                  { selected: checkStore.washServise.id === service.id },
+                ]"
+                @click="selectServiceWash(service)"
+              >
+                <div class="card-title">{{ service.nameservice }}</div>
               </div>
             </div>
           </div>
         </a-tab-pane>
       </a-tabs>
       <div class="action">
-        <a-button type="default" @click="handlePrevious" class="nav-button" size="large" shape="round"
-          :icon="h(ArrowUpOutlined)" :disabled="currentArrivedState.top" />
-        <a-button type="default" @click="handleNext" class="nav-button" size="large" shape="round"
-          :icon="h(ArrowDownOutlined)" :disabled="currentArrivedState.bottom" />
+        <a-button
+          type="default"
+          @click="handlePrevious"
+          class="nav-button"
+          size="large"
+          shape="round"
+          :icon="h(ArrowUpOutlined)"
+          :disabled="currentArrivedState.top"
+        />
+        <a-button
+          type="default"
+          @click="handleNext"
+          class="nav-button"
+          size="large"
+          shape="round"
+          :icon="h(ArrowDownOutlined)"
+          :disabled="currentArrivedState.bottom"
+        />
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, watchEffect, onMounted } from 'vue';
-import { useScroll } from '@vueuse/core';
-import { ArrowUpOutlined, ArrowDownOutlined } from '@ant-design/icons-vue';
+import { ref, onMounted } from "vue";
+import { useScroll } from "@vueuse/core";
+import { ArrowUpOutlined, ArrowDownOutlined } from "@ant-design/icons-vue";
+import { useCheckStore } from "../../../entities/check/models";
+import { API } from "~/shared/api";
 
-const selectedServices = ref<string[]>([]);
+const checkStore = useCheckStore();
 
-const category1 = [
-  { name: 'Дезинфекция одиночного автомобиля (тягач, самосвал, автофургон, автобус) снаружи и внутри жидкими дез.средствами', value: 'service1' },
-  { name: 'Дезинфекция одиночного автомобиля (тягач, самосвал, автофургон, автобус) снаружи и внутри жидкими дез.средствами', value: 'service2' },
-  { name: 'Дезинфекция одиночного автомобиля (тягач, самосвал, автофургон, автобус) снаружи и внутри жидкими дез.средствами', value: 'service3' },
-];
-
-const category2 = [
-  { name: 'Мойка двигателя', value: 'service4' },
-  { name: 'Полировка кузова', value: 'service5' },
-  { name: 'Антидождь', value: 'service6' },
-  { name: 'Нанесение воска', value: 'service7' },
-  { name: 'Мойка двигателя', value: 'service8' },
-  { name: 'Полировка кузова', value: 'service9' },
-  { name: 'Антидождь', value: 'service10' },
-  { name: 'Нанесение воска', value: 'service11' }
-];
+const carWash = ref([]);
+const disinfection = ref([]);
 
 const tabContent1 = ref<HTMLElement | null>(null);
 const tabContent2 = ref<HTMLElement | null>(null);
-const activeTab = ref<string>('1');
+const activeTab = ref<string>("1");
 
 const scrollY1 = ref(0);
 const arrivedState1 = ref({ top: true, bottom: false });
 const scrollY2 = ref(0);
 const arrivedState2 = ref({ top: true, bottom: false });
 
-const currentArrivedState = computed(() => (activeTab.value === '1' ? arrivedState1.value : arrivedState2.value));
+const currentArrivedState = computed(() =>
+  activeTab.value === "1" ? arrivedState1.value : arrivedState2.value
+);
 
-const selectService = (service: string) => {
-  const index = selectedServices.value.indexOf(service);
-  if (index === -1) {
-    selectedServices.value.push(service);
-  } else {
-    selectedServices.value.splice(index, 1);
-  }
+const selectServiceWash = (service) => {
+  checkStore.addServiceWash({
+    id: service.id,
+    label: service.nameservice,
+  });
+};
+const selectServiceDisenfection = (service) => {
+  checkStore.addServiceDisenfaction({
+    id: service.id,
+    label: service.namedesinfect,
+  });
 };
 
 const initializeScroll = () => {
-  if (activeTab.value === '1' && tabContent1.value) {
+  if (activeTab.value === "1" && tabContent1.value) {
     const { y, arrivedState } = useScroll(tabContent1);
     scrollY1.value = y;
     arrivedState1.value = arrivedState;
-  } else if (activeTab.value === '2' && tabContent2.value) {
+  } else if (activeTab.value === "2" && tabContent2.value) {
     const { y, arrivedState } = useScroll(tabContent2);
     scrollY2.value = y;
     arrivedState2.value = arrivedState;
@@ -100,32 +120,64 @@ const handleTabChange = (key: string) => {
 
 onMounted(() => {
   initializeScroll();
+  fetchServiceList();
 });
 
+const fetchServiceList = async () => {
+  const privelage = checkStore.carrier === "АГРОПРОМТРАНС";
+  if (privelage) {
+    const { data: wahingList } = await API.get("get_our_service");
+    const { data: disinfectList } = await API.get("get_our_desinfect");
+    carWash.value = wahingList;
+    disinfection.value = disinfectList;
+  } else {
+    const { data: wahingList } = await API.get("get_enemy_service");
+    const { data: disinfectList } = await API.get("get_enemy_desinfect");
+    carWash.value = wahingList;
+    disinfection.value = disinfectList;
+  }
+};
+
 const handlePrevious = () => {
-  if (activeTab.value === '1' && tabContent1.value && !arrivedState1.value.top) {
+  if (
+    activeTab.value === "1" &&
+    tabContent1.value &&
+    !arrivedState1.value.top
+  ) {
     tabContent1.value.scrollTo({
       top: tabContent1.value.scrollTop - tabContent1.value.clientHeight,
-      behavior: 'smooth'
+      behavior: "smooth",
     });
-  } else if (activeTab.value === '2' && tabContent2.value && !arrivedState2.value.top) {
+  } else if (
+    activeTab.value === "2" &&
+    tabContent2.value &&
+    !arrivedState2.value.top
+  ) {
     tabContent2.value.scrollTo({
       top: tabContent2.value.scrollTop - tabContent2.value.clientHeight,
-      behavior: 'smooth'
+      behavior: "smooth",
     });
   }
 };
 
 const handleNext = () => {
-  if (activeTab.value === '1' && tabContent1.value && !arrivedState1.value.bottom) {
+  if (
+    activeTab.value === "1" &&
+    tabContent1.value &&
+    !arrivedState1.value.bottom
+  ) {
     tabContent1.value.scrollTo({
       top: tabContent1.value.scrollTop + tabContent1.value.clientHeight,
-      behavior: 'smooth'
+      behavior: "smooth",
     });
-  } else if (activeTab.value === '2' && tabContent2.value && !arrivedState2.value.bottom) {
+  } else if (
+    activeTab.value === "2" &&
+    tabContent2.value &&
+    !arrivedState2.value.bottom
+  ) {
     tabContent2.value.scrollTo({
       top: tabContent2.value.scrollTop + tabContent2.value.clientHeight,
-      behavior: 'smooth'
+      behavior: "smooth",
     });
   }
 };
